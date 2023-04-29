@@ -1,0 +1,13 @@
+.mydiv{
+    background-color: aqua;
+    text-align: center;
+    width: 50em;
+    height: 15em;
+}
+
+.mydiv textarea{
+    background-color: antiquewhite;
+    resize: none;
+    width: 30em;
+    height: 10em;
+}
