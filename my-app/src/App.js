@@ -20,10 +20,10 @@ function Selector()
 {
   return (
     <select name="mySelector" id="selector">
-      <option value="1">num1</option>
-      <option value="2">num2</option>
-      <option value="3">num3</option>
-      <option value="4">num4</option>
+      <option value="random">Random</option>
+      <option value="famous-quotes">Famous Quotes</option>
+      <option value="science">Science</option>
+      <option value="technology">Technology</option>
     </select>
   )
 }
