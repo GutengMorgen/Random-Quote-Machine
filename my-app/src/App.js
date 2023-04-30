@@ -16,44 +16,50 @@ function TumblerBt()
   );
 }
 
-//principal button
-function QuoteBt({text, setColor, color})
+function Selector()
 {
-  const handleClick = () =>
-  {
-    console.log(text);
-    setColor(color === 'blue' ? 'red' : 'blue');
-  }
+  return (
+    <select name="mySelector" id="selector">
+      <option value="1">num1</option>
+      <option value="2">num2</option>
+      <option value="3">num3</option>
+      <option value="4">num4</option>
+    </select>
+  )
+}
+
+
+//principal button
+function QuoteButton({ isBlue, setColor }) {
+  const buttonColor = isBlue ? 'red' : 'blue';
 
   return (
-    <button style={{backgroundColor: color}} onClick={handleClick}>
+    <button style={{ backgroundColor: buttonColor }} onClick={setColor}>
       quote
     </button>
   );
 }
 
 //textarea
-function Mytext({onChange, value})
-{
-  const handleOnChange = (event) =>
-  {
-    onChange(event.target.value);
-  }
-
+function Mytext({ quote, author }) {
   return (
-    <textarea value={value} onChange={handleOnChange}></textarea>
-  )
+  <div>
+    <textarea value={quote} readOnly></textarea>
+    <p>
+      <textarea id='authorText' value={author} readOnly></textarea>
+    </p>
+  </div>
+  );
 }
 
 //proptypes
-QuoteBt.prototype = {
-  text: PropTypes.string.isRequired,
+QuoteButton.prototype = {
   setColor: PropTypes.func.isRequired,
-  color: PropTypes.string.isRequired
+  isBlue: PropTypes.bool.isRequired
 }
 Mytext.prototype = {
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.string.isRequired
+  quote: PropTypes.string.isRequired,
+  author: PropTypes.string.isRequired
 }
 
 //class default App
@@ -61,30 +67,46 @@ class App extends Component{
   constructor(props){
     super(props)
     this.state = {
-      text: '',
-      color: 'red'
+      quote: '',
+      author: '',
+      isBlue: false
+    }
+    this.handleClicked = this.handleClicked.bind(this);
+  }
+
+  fetchQuote = async () => {
+    try {
+      const response = await fetch('https://api.quotable.io/random');
+      const data = await response.json();
+      this.setState({
+        quote: data.content,
+        author: data.author
+      });
+    }
+    catch (error){
+      console.log(error);
     }
   }
 
-  handleTextChange = (text) => {
-    this.setState({text});
-  }
-
-  handleSetColor = (color) => {
-    this.setState({color})
+  handleClicked(){
+    this.setState({isBlue: !this.state.isBlue})
+    this.fetchQuote();
   }
 
   render(){
-    const {text, color} = this.state;
+    const {quote, author, isBlue} = this.state;
 
     return(
-      <div className='mydiv'>
-        <p>
-          <Mytext onChange={this.handleTextChange} value={text}/>
-        </p>
-        <TwitterBt/>
-        <TumblerBt/>
-        <QuoteBt text={text} setColor={this.handleSetColor} color={color}/>
+      <div className='principal'>
+        <div className='item1'>
+          <Mytext quote={quote} author={author}/>
+          <TwitterBt/>
+          <TumblerBt/>
+        </div>
+        <div className='item2'>
+          <Selector/>
+          <QuoteButton setColor={this.handleClicked} isBlue={isBlue}/>
+        </div>
       </div>
     )
   }
