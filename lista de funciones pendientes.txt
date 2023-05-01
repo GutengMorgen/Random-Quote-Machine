@@ -16,3 +16,4 @@ to select:
         genere una quote con ese tag:
         -obtener el option actual del select cuando se haga click
         -ponerlo en una variable y darselo a la api
+        -hacer que todos los slug de /tags se guarden en un option con su id como key

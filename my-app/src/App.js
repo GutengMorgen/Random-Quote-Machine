@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
-import PropTypes from 'prop-types';
-import './styles.css'
+import * as api from './Api.js';
+import './styles.css';
 
 function TwitterBt()
 {
@@ -28,73 +28,50 @@ function Selector()
   )
 }
 
-
-//principal button
-function QuoteButton({ isBlue, setColor }) {
-  const buttonColor = isBlue ? 'red' : 'blue';
-
-  return (
-    <button style={{ backgroundColor: buttonColor }} onClick={setColor}>
-      quote
-    </button>
-  );
-}
-
 //textarea
 function Mytext({ quote, author }) {
   return (
   <div>
-    <textarea value={quote} readOnly></textarea>
+    <textarea value={quote} disabled></textarea>
     <p>
-      <textarea id='authorText' value={author} readOnly></textarea>
+      <textarea id='authorText' value={author} disabled></textarea>
     </p>
   </div>
   );
 }
 
-//proptypes
-QuoteButton.prototype = {
-  setColor: PropTypes.func.isRequired,
-  isBlue: PropTypes.bool.isRequired
-}
-Mytext.prototype = {
-  quote: PropTypes.string.isRequired,
-  author: PropTypes.string.isRequired
-}
-
 //class default App
-class App extends Component{
+export default class App extends Component{
   constructor(props){
     super(props)
     this.state = {
       quote: '',
-      author: '',
-      isBlue: false
+      author: ''
     }
     this.handleClicked = this.handleClicked.bind(this);
   }
 
   fetchQuote = async () => {
     try {
-      const response = await fetch('https://api.quotable.io/random');
-      const data = await response.json();
+      const getRandomQuotes = await api.randomQuotes();
+
       this.setState({
-        quote: data.content,
-        author: data.author
-      });
+        quote: getRandomQuotes.content,
+        author: getRandomQuotes.author
+      })
     }
-    catch (error){
+    catch (error) {
       console.log(error);
     }
   }
 
   handleClicked(){
-    this.setState({isBlue: !this.state.isBlue})
     this.fetchQuote();
+    api.GetData();
   }
 
   render(){
-    const {quote, author, isBlue} = this.state;
+    const {quote, author} = this.state;
 
     return(
       <div className='principal'>
@@ -105,11 +82,9 @@ class App extends Component{
         </div>
         <div className='item2'>
           <Selector/>
-          <QuoteButton setColor={this.handleClicked} isBlue={isBlue}/>
+          <button onClick={this.handleClicked}>next</button>
         </div>
       </div>
     )
   }
 }
-
-export default App;
