@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import * as api from './Api.js';
+import {useState, useEffect} from 'react';
 import './styles.css';
 
 function TwitterBt()
@@ -16,23 +17,38 @@ function TumblerBt()
   );
 }
 
-function Selector()
-{
+function TestingSelection(){
+  const [mytags, setTags] = useState([]);
+
+  useEffect(() => {
+    async function fetchData(){
+      const response = await api.tags();
+      const filter = response.filter(item => item.quoteCount > 0);
+      
+      const options = filter.map(tag => <option value={tag.slug} key={tag._id}>{tag.name}</option>);
+
+      setTags(options);
+    }
+
+    fetchData();
+  }, []);
+
   return (
-    <select name="mySelector" id="selector">
-      <option value="random">Random</option>
-      <option value="famous-quotes">Famous Quotes</option>
-      <option value="science">Science</option>
-      <option value="technology">Technology</option>
-    </select>
-  )
+    <div>
+      <select id="mySelect">
+        <option value="random" defaultValue={true}>Random</option>
+        {mytags}
+      </select>
+    </div>
+  );
 }
 
 //textarea
-function Mytext({ quote, author }) {
+function Mytext({ quote, tags, author }) {
   return (
   <div>
-    <textarea value={quote} disabled></textarea>
+    <textarea value={quote} disabled></textarea><br />
+    <textarea id='tags' value={tags} disabled></textarea>
     <p>
       <textarea id='authorText' value={author} disabled></textarea>
     </p>
@@ -46,42 +62,49 @@ export default class App extends Component{
     super(props)
     this.state = {
       quote: '',
+      tags: '',
       author: ''
     }
     this.handleClicked = this.handleClicked.bind(this);
   }
 
-  fetchQuote = async () => {
+  testingFetchQuote = async (currentTag) => {
+
     try {
-      const getRandomQuotes = await api.randomQuotes();
+      const getUniqueQoute = await api.getQouteByTag(currentTag);
 
       this.setState({
-        quote: getRandomQuotes.content,
-        author: getRandomQuotes.author
+        quote: getUniqueQoute.content,
+        tags: getUniqueQoute.tags,
+        author: getUniqueQoute.author
       })
-    }
-    catch (error) {
+
+      // console.log(getUniqueQoute);
+
+    } catch (error) {
       console.log(error);
     }
   }
 
   handleClicked(){
-    this.fetchQuote();
-    api.GetData();
+    const value = document.getElementById('mySelect').value;
+    // console.log(`the actual selects value: ${value}`);
+    
+    this.testingFetchQuote(value);
   }
 
   render(){
-    const {quote, author} = this.state;
+    const {quote, tags, author} = this.state;
 
     return(
       <div className='principal'>
         <div className='item1'>
-          <Mytext quote={quote} author={author}/>
+          <Mytext quote={quote} tags={tags} author={author}/>
           <TwitterBt/>
           <TumblerBt/>
         </div>
         <div className='item2'>
-          <Selector/>
+          <TestingSelection/>
           <button onClick={this.handleClicked}>next</button>
         </div>
       </div>

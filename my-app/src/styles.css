@@ -26,6 +26,13 @@
     height: 15px;
 }
 
+.item1 #tags{
+    width:200px;
+    background-color: pink;
+    text-align: center;
+    height: auto;
+}
+
 .item1{
     background-color: greenyellow;
     grid-area: item1;
@@ -46,6 +53,6 @@
 
 .item2 select{
     float: left;
-    width: 100px;
+    width: auto;
     outline: none;
 }
