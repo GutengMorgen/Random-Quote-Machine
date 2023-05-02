@@ -1,23 +1,24 @@
 to start:
-    -crear un div que contenga todos los elementos
-        -div que contenga la quote y el autor
-        -boton para twitter
-        -boton para tumbler
-        -boton para pasar a otro quote
+    * -crear un div que contenga todos los elementos
+        * -div que contenga la quote y el autor
+        * -boton para twitter
+        * -boton para tumbler
+        * -boton para pasar a otro quote
 
 to function:
-    -hacer que el boton quote cambie el texto del quote
+    * -hacer que el boton quote cambie el texto del quote
     -hacer que cuando se haga click se deshabilite la funcion del click temporalmente hasta que aparezca el texto
     -crear una funcion para que aparezca un texto al lado del boton quote que contenga: "esperando..."
-    -poner como predeterminado la option random en el select
-    -agregar un label o textarea que incluya los tags de la quote
-    -cambiar la funcion getQouteByTag() para que tenga un parametro predefinido igual a random
+    * -poner como predeterminado la option random en el select
+    * -agregar un label o textarea que incluya los tags de la quote
+    * -cambiar la funcion getQouteByTag() para que tenga un parametro predefinido igual a random
     -agregar la cantidad de quotes de un tag al lago del mismo
+    -saber cuantos quotes existe con el tag seleccionado y si solo existe uno que se dehabilite el boton
 
 
 to select:
-    -cuando se haga click en el boton se obtenga la opcion actual del select y que pase el string de esa option al tag de la api para que
+    * -cuando se haga click en el boton se obtenga la opcion actual del select y que pase el string de esa option al tag de la api para que
         genere una quote con ese tag:
-        -obtener el option actual del select cuando se haga click
-        -ponerlo en una variable y darselo a la api
-        -hacer que todos los slug de /tags se guarden en un option con su id como key
+        * -obtener el option actual del select cuando se haga click
+        * -ponerlo en una variable y darselo a la api
+        * -hacer que todos los slug de /tags se guarden en un option con su id como key
