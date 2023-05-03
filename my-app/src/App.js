@@ -110,19 +110,35 @@ function TestingSelection({triggerRef}){
   );
 }
 
+function MyImage({authorSlug}){
+  
+  //on testing - if there not picture of the author so put the default-user.png or try to put a gif of something
+  const defaultSlug = 'albert-einstein';
+  const [slug, setSlug] = useState(null);
+
+  useEffect(() => {
+    async function fetchImage() {
+      const url = await api.getImage(authorSlug);
+      setSlug(url);
+    }
+
+    fetchImage();
+  }, [authorSlug]);
+
+  return (
+    <div>
+      <img src={slug} alt={authorSlug || defaultSlug}/>
+    </div>
+  )
+}
+
+
 //textarea
 function Mytext({ quote, tags, author, authorSlug}) {
-
-  //on testing
-  const defaultSlug = 'albert-einstein';
-  let slug = `https://images.quotable.dev/profile/200/${authorSlug || defaultSlug}.jpg`
-
   return (
   <div>
     <textarea value={quote} disabled></textarea><br />
-    <div>
-      <img src={slug} alt={authorSlug || defaultSlug} />
-    </div>
+    <MyImage authorSlug={authorSlug}/>
     <textarea id='tags' value={tags} disabled></textarea><br />
     <textarea id='authorText' value={author} disabled></textarea>
   </div>
