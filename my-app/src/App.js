@@ -4,6 +4,7 @@ import {useState, useEffect, useRef} from 'react';
 import './styles.css';
 import './custom_select.css';
 // import * as selectJS from'./select_functions.js';
+import fallback from './default-user.png';
 
 function TwitterBt()
 {
@@ -110,19 +111,49 @@ function TestingSelection({triggerRef}){
   );
 }
 
+function MyImage({authorSlug, author}){
+  
+  //on testing - if there not picture of the author so put the default-user.png or try to put a gif of something
+  const defaultSlug = 'albert-einstein';
+  const [slug, setSlug] = useState(null);
+
+  useEffect(() => {
+    async function fetchImage() {
+      // const url = await api.getImage(authorSlug);
+      const url = await api.getWikiImage(author);
+      
+      const page = Object.values(url.query.pages)[0];
+      // page.original.width = 50;
+      // page.original.height = 10;
+      //on testing
+      if (page.original && page.original.source)
+      {  
+        const imagesUrl = page.original.source;
+        // console.log(url);
+        setSlug(imagesUrl);
+      }
+      else{
+        setSlug(fallback);
+      }
+    }
+
+    fetchImage();
+  }, [author]);
+
+  return (
+    <div>
+      <img src={slug} alt={authorSlug || defaultSlug} width={200} height={200}/>
+    </div>
+  )
+}
+
+
 //textarea
 function Mytext({ quote, tags, author, authorSlug}) {
-
-  //on testing
-  const defaultSlug = 'albert-einstein';
-  let slug = `https://images.quotable.dev/profile/200/${authorSlug || defaultSlug}.jpg`
-
   return (
   <div>
     <textarea value={quote} disabled></textarea><br />
-    <div>
-      <img src={slug} alt={authorSlug || defaultSlug} />
-    </div>
+    <MyImage authorSlug={authorSlug} author={author}/>
     <textarea id='tags' value={tags} disabled></textarea><br />
     <textarea id='authorText' value={author} disabled></textarea>
   </div>
@@ -177,7 +208,7 @@ export default class App extends Component{
       event.target.disabled = true;
     }
 
-    console.log(this.state.clicks);
+    // console.log(this.state.clicks);
 
     this.testingFetchQuote(value);
   }
