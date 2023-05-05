@@ -3,10 +3,9 @@ import * as api from './Api.js';
 import {useState, useEffect, useRef} from 'react';
 import './styles.css';
 import './custom_select.css';
-// import * as selectJS from'./select_functions.js';
-import fallback from './default-user.png';
+import fallgif from './xd.gif';
 
-function TwitterBt()
+/*function TwitterBt()
 {
   //dont fucking work
   function handleClick(event) {
@@ -18,9 +17,9 @@ function TwitterBt()
   return (
     <button onClick={handleClick}>tweet</button>
   );
-}
+}*/
 
-function TumblerBt()
+/*function TumblerBt()
 {
   function handleClick() {
     
@@ -29,7 +28,7 @@ function TumblerBt()
   return (
     <button onClick={handleClick}>facebook</button>
   );
-}
+}*/
 
 function TestingSelection({triggerRef}){
   const [mytags, setTags] = useState([]);
@@ -95,8 +94,7 @@ function TestingSelection({triggerRef}){
   }, []);
 
   return (
-    <div>
-      <div className="selector_wrapper">
+    <div className="selector_wrapper">
         <div id="select_trigger" onClick={handleTriggerClick} ref={select_trigger}>
           <span id="trigger" data-value="random" ref={triggerRef}>Random Quote</span>
         </div>
@@ -106,56 +104,69 @@ function TestingSelection({triggerRef}){
             {mytags}
           </div>
         </div>
-      </div>
     </div>
   );
 }
 
-function MyImage({authorSlug, author}){
-  
+function MyImage(props){
+  const {authorSlug, author, setLoading} = props;
+
   //on testing - if there not picture of the author so put the default-user.png or try to put a gif of something
-  const defaultSlug = 'albert-einstein';
   const [slug, setSlug] = useState(null);
 
   useEffect(() => {
+    setLoading(true);
     async function fetchImage() {
-      // const url = await api.getImage(authorSlug);
       const url = await api.getWikiImage(author);
+
+      if(url.query)
+      {
+        const page = Object.values(url.query.pages)[0];
+        //on testing
+        if (page.original && page.original.source)
+        {  
+          const imagesUrl = page.original.source;
+          // console.log(url);
+          setSlug(imagesUrl);
+        }
+        else{
+          setSlug(fallgif);
+          setLoading(false);
+        }
+      }
       
-      const page = Object.values(url.query.pages)[0];
-      // page.original.width = 50;
-      // page.original.height = 10;
-      //on testing
-      if (page.original && page.original.source)
-      {  
-        const imagesUrl = page.original.source;
-        // console.log(url);
-        setSlug(imagesUrl);
-      }
-      else{
-        setSlug(fallback);
-      }
     }
 
     fetchImage();
-  }, [author]);
+  }, [author, setLoading]);
+
+  function handleLoad(){
+    setLoading(false);
+    // console.log('loading....');
+  }
 
   return (
-    <div>
-      <img src={slug} alt={authorSlug || defaultSlug} width={200} height={200}/>
+    <div id='imageContainer'>
+      <img src={slug || fallgif} alt={authorSlug || 'Image not found, sorry for disappointing you'} onLoad={handleLoad}/>
     </div>
   )
 }
 
 
 //textarea
-function Mytext({ quote, tags, author, authorSlug}) {
+function Mytext(props) {
+  const { quote, tags, author, authorSlug, setIsLoading} = props;
+
   return (
-  <div>
-    <textarea value={quote} disabled></textarea><br />
-    <MyImage authorSlug={authorSlug} author={author}/>
-    <textarea id='tags' value={tags} disabled></textarea><br />
-    <textarea id='authorText' value={author} disabled></textarea>
+  <div className='item1'>
+    <div className='AboutQuote'>
+      <span id='quoteContainer'>"{quote}"</span>
+      <span className='tagsContainer' id='tags'>{tags}</span>
+    </div>
+    <div className='AboutAuthor'>
+          <MyImage authorSlug={authorSlug} author={author} setLoading={setIsLoading}/>
+          <span className='nameContainer' id='authorText'>{author}</span>
+    </div>
   </div>
   );
 }
@@ -169,14 +180,19 @@ export default class App extends Component{
       tags: '',
       author: '',
       authorSlug: '',
-      clicks: 0
+      clicks: 0,
+      isLoading: false
     }
     this.handleClicked = this.handleClicked.bind(this);
     this.triggerRef = React.createRef(null);
   }
 
-  testingFetchQuote = async (currentTag) => {
+  setIsLoading = (isLoading) => {
+    this.setState({ isLoading });
+  }
 
+  testingFetchQuote = async (currentTag) => {
+    this.setIsLoading(true);
     try {
       const getUniqueQoute = await api.getQouteByTag(currentTag);
 
@@ -184,14 +200,16 @@ export default class App extends Component{
         quote: getUniqueQoute.content,
         tags: getUniqueQoute.tags,
         author: getUniqueQoute.author,
-        authorSlug: getUniqueQoute.authorSlug
+        authorSlug: getUniqueQoute.authorSlug,
       })
-
       // console.log(getUniqueQoute);
 
     } catch (error) {
       console.log(error);
+      this.setIsLoading(false);
     }
+    
+    this.setIsLoading(false);
   }
 
   handleClicked(event){
@@ -207,25 +225,28 @@ export default class App extends Component{
       this.setState ({clicks: 0});
       event.target.disabled = true;
     }
-
     // console.log(this.state.clicks);
 
     this.testingFetchQuote(value);
   }
 
+  componentDidMount() {
+    // Llama a testingFetchQuote una vez que la página se haya cargado
+    this.testingFetchQuote('random');
+  }
+
   render(){
-    const {quote, tags, author, authorSlug} = this.state;
+    const {quote, tags, author, authorSlug, isLoading} = this.state;
 
     return(
-      <div className='principal'>
-        <div className='item1'>
-          <Mytext quote={quote} tags={tags} author={author} authorSlug={authorSlug}/>
-          <TwitterBt/>
-          <TumblerBt/>
-        </div>
+      <div>
+        <Mytext quote={quote} tags={tags} author={author} authorSlug={authorSlug} setIsLoading={this.setIsLoading}/>
+        
+        {/* <TwitterBt/>
+        <TumblerBt/> */}
         <div className='item2'>
           <TestingSelection triggerRef={this.triggerRef}/>
-          <button id='mybutton' onClick={this.handleClicked}>next</button>
+          <button id='mybutton' onClick={this.handleClicked} disabled={isLoading ? (true) : (false)}>{isLoading ? ('loading...'): ('next')}</button>
         </div>
       </div>
     )

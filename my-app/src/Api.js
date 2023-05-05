@@ -2,6 +2,7 @@ import fallback from './default-user.png';
 const BASE_URL = 'https://api.quotable.io';
 const IMAGE_BASE = 'https://images.quotable.dev/profile/200' //size = 200
 const WIKI_IMAGE_BASE = 'https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles='
+// const WIKI_IMAGE_BASE = 'https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=thumbnail&pithumbsize=400&titles='
 
 export const tags = async () => {
     try {

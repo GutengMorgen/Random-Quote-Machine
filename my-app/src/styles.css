@@ -1,58 +1,114 @@
-.principal{
-    background-color: brown;
-    text-align: center;
-    width: 100%;
-    height: 100%;
-    display: grid;
-    gap: 10px;
-    grid-template-columns: 1fr auto;
-    grid-template-areas: 
-        "item1"
-        "item2";
-}
-
-.item1 textarea{
-    background-color: antiquewhite;
-    resize: none;
-    width: 30em;
-    height: 5em;
-}
-
-.item1 #authorText{
-    width: 200px;
-    background-color: skyblue;
-    padding: 15px;
-    text-align: center;
-    height: 15px;
-}
-
-.item1 #tags{
-    width:200px;
-    background-color: pink;
-    text-align: center;
-    height: auto;
-}
-
 .item1{
-    background-color: greenyellow;
-    grid-area: item1;
-    width: 50em;
-    align-self: center;
-    justify-self: center;
+    background-color: #F4B2B2;
+    width: auto;
+    display: grid;
+    gap: 15px;
+    padding: 15px;
+    grid-template-columns: 1fr 15em;
+    grid-template-rows: 17em;
+    grid-template-areas: 
+    "aq aa";
+    border-radius: 15px;
+    border: 1px solid #F4B2B2;
 }
+
+#quoteContainer{
+    background-color: rgba(244, 244, 244, 0.9);
+    width: 27em;
+    height: 10em;
+    display: block;
+
+    /* more styles */
+    padding: 15px;
+    font-size: larger;
+    border: none;
+    border-radius: 12px;
+    resize: none;
+}
+
+#imageContainer{
+    background-color: darkmagenta;
+    height: 14em;
+    padding-top: 2px;
+    position: relative;
+}
+
+#imageContainer img{
+    height: 13.5em;
+    width: 13.5em;
+    border-radius: 50%;
+    border: 2px solid #855001;
+}
+
+#tags{
+    width: fit-content;
+    height: auto;
+    display: block;
+    margin: 7px;
+
+    /* more styles */
+    padding: 3px 7px;
+    font-size: x-small;
+    background-color: #F4F4F4;
+    border-radius: 2px;
+}
+
+#authorText{
+    width: fit-content;
+    height: auto;
+    display: inline-block;
+
+    /* more styles */
+    padding: 4px 10px;
+    background-color: #F4F4F4;
+    border-radius: 3px;
+    margin-top: 10px;
+}
+
+.AboutQuote{grid-area: aq;}
+.AboutAuthor{grid-area: aa;}
 
 .item2{
-    background-color: orange;
-    grid-area: item2;
+    background-color: #F4F4F4;
+    padding: 20px;
+    border: 1px solid #E8E8E8;
+    border-radius: 7px;
+    margin-top: 20px;
     text-align: right;
-    padding: 20px 0;
-    width: 50em;
-    align-self: center;
-    justify-self: center;
 }
 
-.item2 select{
-    float: left;
-    width: auto;
-    outline: none;
+#mybutton{
+    background-color: #3F2602;
+    border: 1px solid #200202;
+    color: white;
+    border-radius: 4px;
+    padding: 15px 45px;
+}
+
+body{
+    background-color: #FFE8AD;
+    display: flex;
+    min-height: 100vh;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+  
+/* Track */
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #888; 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555; 
 }

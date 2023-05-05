@@ -6,6 +6,12 @@
     cursor: pointer;
     width: 0;
     text-align: left;
+
+    /* more styles */
+    display: block;
+    float: left;
+    position: relative;
+    margin-top: 10px;
 }
 
 /* div predeterminado */
@@ -42,7 +48,7 @@
 {
     /* width: 164px; */
     width: 177px;
-    max-height: 70px;
+    max-height: 107px;
     overflow-y: auto;
 }
 
