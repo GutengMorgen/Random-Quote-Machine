@@ -4,6 +4,8 @@ import {useState, useEffect, useRef} from 'react';
 import './styles.css';
 import './custom_select.css';
 import fallgif from './xd.gif';
+import ColorThief from "colorthief";
+
 
 /*function TwitterBt()
 {
@@ -145,9 +147,85 @@ function MyImage(props){
     // console.log('loading....');
   }
 
+  function rgbToHsl(r, g, b) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+  
+    let cmin = Math.min(r,g,b),
+        cmax = Math.max(r,g,b),
+        delta = cmax - cmin,
+        h = 0,
+        s = 0,
+        l = 0;
+  
+    if (delta === 0) {
+      h = 0;
+    }
+    else if (cmax === r) {
+      h = ((g - b) / delta) % 6;
+    }
+    else if (cmax === g) {
+      h = (b - r) / delta + 2;
+    }
+    else {
+      h = (r - g) / delta + 4;
+    }
+  
+    h = Math.round(h * 60);
+  
+    if (h < 0) {
+      h += 360;
+    }
+  
+    l = (cmax + cmin) / 2;
+  
+    s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+  
+    s = +(s * 100).toFixed(1);
+    l = +(l * 100).toFixed(1);
+  
+    return {h, s, l};
+    // return (`hsl(${h}%, ${s}%, ${l}%)`);
+  }
+
+  // const ColorThief = require('colorthief');
+  function handleClick(){
+    function getDominantColor() {
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.src = slug;
+
+      img.onload = function () {
+        const colorThief = new ColorThief();
+        const dominantColor = colorThief.getColor(img);
+        // const rbg = `rgb(${dominantColor[0]}, ${dominantColor[1]}, ${dominantColor[2]})`
+        const hsl = rgbToHsl(dominantColor[0], dominantColor[1], dominantColor[2])
+        let light, dark;
+        if(hsl.l > 50){
+          light = `hsla(${hsl.h}, ${hsl.s}%, ${hsl.l}%, 0.75)`;
+          dark = `hsla(${hsl.h}, 50%, 50%, 0.75)`;
+        }
+        else{
+          dark = `hsla(${hsl.h}, ${hsl.s}%, ${hsl.l}%, 0.75)`;
+          light = `hsla(${hsl.h}, 50%, 50%, 0.75)`;
+        }
+        //convertir a decimal hsl
+        const defaultBackground = `linear-gradient(180deg, ${light} 0%, ${dark} 100%)`;
+        document.body.style.background = `${defaultBackground}`;
+        
+        console.log("Color dominante:", hsl, light, dark);
+      };
+    }
+    getDominantColor()
+
+
+    
+  }
+
   return (
     <div id='imageContainer'>
-      <img src={slug || fallgif} alt={authorSlug || 'Image not found, sorry for disappointing you'} onLoad={handleLoad}/>
+      <img id='imagen' src={slug || fallgif} alt={authorSlug || 'Image not found, sorry for disappointing you'} onLoad={handleLoad} onClick={handleClick}/>
     </div>
   )
 }

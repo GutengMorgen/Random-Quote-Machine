@@ -1,5 +1,5 @@
 .item1{
-    background-color: #F4B2B2;
+    /* background-color: rgba(244, 178, 178, 0.9); */
     width: auto;
     display: grid;
     gap: 15px;
@@ -8,22 +8,59 @@
     grid-template-rows: 17em;
     grid-template-areas: 
     "aq aa";
+    /* border-radius: 15px;
+    border: 1px solid rgba(244, 178, 178, 0.9); */
+
+    background: radial-gradient(59.28% 262.89% at 22.57% 64.09%, rgba(211, 154, 154, 0.045) 0%, rgba(255, 168, 168, 0.126) 0.01%, rgba(255, 155, 155, 0.129) 50.41%, rgba(255, 162, 162, 0.123) 100%) /* warning: gradient uses a rotation that is not supported by CSS and may not behave as expected */;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(6px);
     border-radius: 15px;
-    border: 1px solid #F4B2B2;
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital@1&display=swap');
+
 #quoteContainer{
-    background-color: rgba(244, 244, 244, 0.9);
-    width: 27em;
-    height: 10em;
-    display: block;
+    /* background-color: rgba(244, 244, 244, 0.9); */
+    width: 20em;
+    height: 6em;
+    /* display: block; */
 
     /* more styles */
     padding: 15px;
-    font-size: larger;
-    border: none;
-    border-radius: 12px;
+    font-size: xx-large;
+    /* border: 1px solid rgba(43, 43, 43, 0.568);
+    border-radius: 12px; */
     resize: none;
+    position: relative;
+
+    /* testing shit */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Cormorant Garamond', serif;
+    /* From https://css.glass
+    background: rgba(92, 5, 115, 0.18);
+    border-radius: 12px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(6.2px);
+    -webkit-backdrop-filter: blur(6.2px);
+    border: 1px solid rgba(92, 5, 115, 0.22);
+    */
+    /* 
+    width: 27em;
+    height: 10em;
+    display: block;
+    padding: 15px;
+    font-size: larger;
+    resize: none;
+    position: relative;
+    background: rgb(255 255 255 / 23%);
+    border-radius: 12px;
+    box-shadow: 4px 9px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(21.2px);
+    -webkit-backdrop-filter: blur(6.2px);
+    border: 1px solid rgb(92 92 92 / 22%);
+    */
 }
 
 #imageContainer{
@@ -69,29 +106,39 @@
 .AboutAuthor{grid-area: aa;}
 
 .item2{
-    background-color: #F4F4F4;
+    /* background-color: #F4F4F4; */
     padding: 20px;
-    border: 1px solid #E8E8E8;
+    /* border: 1px solid #E8E8E8; */
     border-radius: 7px;
     margin-top: 20px;
     text-align: right;
+
+    background: rgba(244, 244, 244, 0.11);
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(5px);
+    border-radius: 7px;
 }
 
 #mybutton{
-    background-color: #3F2602;
-    border: 1px solid #200202;
+    /* background-color: #3F2602;
+    border: 1px solid #200202; */
     color: white;
     border-radius: 4px;
     padding: 15px 45px;
+
+    background: #40314A;
+    border: 1px solid #3C3143;
+    box-shadow: 0px 4px 6px 1px rgba(0, 0, 0, 0.25);
 }
 
 body{
-    background-color: #FFE8AD;
     display: flex;
     min-height: 100vh;
     justify-content: center;
     align-items: center;
     text-align: center;
+
+    /* background: linear-gradient(180deg, rgba(214, 158, 158, 0.75) 0%, rgba(122, 16, 16, 0.75) 100%); */
 }
 
 ::-webkit-scrollbar {
