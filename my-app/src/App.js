@@ -1,12 +1,11 @@
-import React, {Component} from 'react';
+import React, {Component, useCallback, useState, useEffect, useRef} from 'react';
 import * as api from './Api.js';
-import {useState, useEffect, useRef} from 'react';
+import rgbConverter from './rgbTohsl.js';
+import ColorThief from "colorthief";
 import './styles.css';
-import './custom_select.css';
-// import * as selectJS from'./select_functions.js';
-import fallback from './default-user.png';
+import fallgif from './zen-meditation.gif';
 
-function TwitterBt()
+/*function TwitterBt()
 {
   //dont fucking work
   function handleClick(event) {
@@ -18,9 +17,9 @@ function TwitterBt()
   return (
     <button onClick={handleClick}>tweet</button>
   );
-}
+}*/
 
-function TumblerBt()
+/*function TumblerBt()
 {
   function handleClick() {
     
@@ -29,205 +28,176 @@ function TumblerBt()
   return (
     <button onClick={handleClick}>facebook</button>
   );
-}
+}*/
 
-function TestingSelection({triggerRef}){
+function Selection({triggerRef}){
   const [mytags, setTags] = useState([]);
 
   useEffect(() => {
     async function fetchData(){
-      const response = await api.tags();
-      const filter = response.filter(item => item.quoteCount > 0);
+      const getTags = await api.newTags();
+      const getdata = getTags.data;
 
-      const options = filter.map(tag => <span className="option" data-value={tag.slug} data-amount={tag.quoteCount} key={tag._id}>{tag.name}</span>)
-
+      const options = getdata.map(tag => <option key={tag} value={tag}>{tag}</option>)
+      // console.log(getdata);
       setTags(options);
     }
 
     fetchData();
   }, []);
 
-  
-  const [selectedOption, setSelectedOption] = useState(null);
-  const select_trigger = useRef(null);
-  // const triggerRef = useRef(null);
-  const optionsRef = useRef(null);
-  const selectOptionsRef = useRef(null);
-
-  function handleTriggerClick() {
-    const selectOptions = selectOptionsRef.current;
-    const options = optionsRef.current.querySelectorAll('.option');
-
-    selectOptions.classList.toggle('show');
-
-    // console.log(triggerRef.current.dataset.value);
-
-    options.forEach(option => {
-      option.addEventListener('click', () => {
-        triggerRef.current.dataset.value = option.dataset.value;
-        triggerRef.current.dataset.amount = option.dataset.amount;
-        triggerRef.current.textContent = option.textContent;
-
-        if (selectedOption) selectedOption.classList.remove('selected');
-        option.classList.add('selected');
-        setSelectedOption(option);
-
-        selectOptions.classList.remove('show');
-
-        // on testing
-        const button =  document.getElementById('mybutton');
-        button.disabled = false;
-      })
-      // console.log(option.dataset.value, option.dataset.amount);
-    });
-  }
-
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (!select_trigger.current.contains(event.target))
-        selectOptionsRef.current.classList.remove('show');
-    }
-    document.addEventListener('click', handleClickOutside);
-
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
-  }, []);
-
   return (
-    <div>
-      <div className="selector_wrapper">
-        <div id="select_trigger" onClick={handleTriggerClick} ref={select_trigger}>
-          <span id="trigger" data-value="random" ref={triggerRef}>Random Quote</span>
-        </div>
-        <div id="select_options" ref={selectOptionsRef}>
-          <div id="container_options" ref={optionsRef}>
-            <span className="option" data-value="random">Random Quote</span>
-            {mytags}
-          </div>
-        </div>
-      </div>
+    <div className="selector_wrapper">
+        <select name="AllGeneres" id="all-generes" ref={triggerRef}>
+          <option value="random">Random</option>
+          {mytags}
+        </select>
     </div>
   );
 }
 
-function MyImage({authorSlug, author}){
-  
-  //on testing - if there not picture of the author so put the default-user.png or try to put a gif of something
-  const defaultSlug = 'albert-einstein';
+function MyImage({author, setLoading}){
   const [slug, setSlug] = useState(null);
 
   useEffect(() => {
+    setLoading(true);
     async function fetchImage() {
-      // const url = await api.getImage(authorSlug);
-      const url = await api.getWikiImage(author);
-      
-      const page = Object.values(url.query.pages)[0];
-      // page.original.width = 50;
-      // page.original.height = 10;
-      //on testing
-      if (page.original && page.original.source)
-      {  
-        const imagesUrl = page.original.source;
-        // console.log(url);
-        setSlug(imagesUrl);
-      }
-      else{
-        setSlug(fallback);
+      try {
+        const url = await api.getWikiImage(author);
+        const page = url.query && Object.values(url.query.pages)[0];
+        setSlug(page?.original?.source || fallgif);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
       }
     }
 
     fetchImage();
-  }, [author]);
+  }, [author, setLoading]);
+
+  const imgRef = useRef(null);
+  const handleLoad = useCallback(() => {
+    setLoading(false);
+
+    const getDominantColor = () => {
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.src = slug;
+      img.onload = () => {
+        const colorThief = new ColorThief();
+        const dominantColor = colorThief.getColor(img);
+        const hsl = rgbConverter(...dominantColor)
+
+        const hslStyle = (h, s, l, a) => `hsla(${h}, ${s}%, ${l}%, ${a})`;
+        const {h, s, l} = hsl;
+        const isLight = l > 50;
+        const lightStyle = hslStyle(h, isLight ? s : 50, isLight ? l : 50, 0.75);
+        const darkStyle = hslStyle(h, isLight ? 50 : s, isLight ? 50 : l, 0.75);
+
+        document.body.style.background = `linear-gradient(180deg, ${lightStyle} 0%, ${darkStyle} 100%)`;
+        imgRef.current.style.border = `2px solid hsl(${h}, ${s}%, ${l}%)`;
+        // console.log("Color dominante:", hsl, lightStyle, darkStyle);
+        
+      };
+    };
+
+    getDominantColor();
+  }, [slug, setLoading]);
 
   return (
-    <div>
-      <img src={slug} alt={authorSlug || defaultSlug} width={200} height={200}/>
+    <div id="imageContainer">
+      <img
+        id="imagen"
+        src={slug || fallgif}
+        alt={author || 'Image not found, sorry for disappointing you'}
+        onLoad={handleLoad}
+        ref={imgRef}
+      />
     </div>
   )
 }
 
+function Mytext(props) {
+  const { quote, tags, author, setIsLoading} = props;
 
-//textarea
-function Mytext({ quote, tags, author, authorSlug}) {
   return (
-  <div>
-    <textarea value={quote} disabled></textarea><br />
-    <MyImage authorSlug={authorSlug} author={author}/>
-    <textarea id='tags' value={tags} disabled></textarea><br />
-    <textarea id='authorText' value={author} disabled></textarea>
+  <div className='item1'>
+    <div className='AboutQuote'>
+      <span id='quoteContainer'>"{quote}"</span>
+      <span className='tagsContainer' id='tags'>{tags}</span>
+    </div>
+    <div className='AboutAuthor'>
+      <MyImage author={author} setLoading={setIsLoading}/>
+      <span className='nameContainer' id='authorText'>{author}</span>
+    </div>
   </div>
   );
 }
 
-//class default App
-export default class App extends Component{
+class App extends Component{
   constructor(props){
     super(props)
     this.state = {
       quote: '',
       tags: '',
       author: '',
-      authorSlug: '',
-      clicks: 0
+      isLoading: false
     }
-    this.handleClicked = this.handleClicked.bind(this);
     this.triggerRef = React.createRef(null);
   }
 
-  testingFetchQuote = async (currentTag) => {
+  setIsLoading = (isLoading) => {
+    this.setState({ isLoading });
+  }
 
+  fetchQuoteByTag = async (currentTag) => {
     try {
-      const getUniqueQoute = await api.getQouteByTag(currentTag);
+      const getNewshit = await api.newGetQuoteByTag(currentTag);
+      const getdata = getNewshit.data[0];
 
-      this.setState({
-        quote: getUniqueQoute.content,
-        tags: getUniqueQoute.tags,
-        author: getUniqueQoute.author,
-        authorSlug: getUniqueQoute.authorSlug
-      })
-
-      // console.log(getUniqueQoute);
-
+      this.updateQuoteData(getdata);
     } catch (error) {
       console.log(error);
     }
   }
 
-  handleClicked(event){
-    const value = this.triggerRef.current.dataset.value;
-    // console.log(`the actual selects value: ${value}`);
-    
-    const amount = this.triggerRef.current.dataset.amount;
+  updateQuoteData = (data) => {
+    this.setState({
+      quote: data.quoteText,
+      tags: data.quoteGenre,
+      author: data.quoteAuthor
+    })
+  }
 
-    this.setState (prevState => ({ clicks: prevState.clicks + 1 }))
+  handleClicked = () => {
+    const value = this.triggerRef.current.value;
+    this.fetchQuoteByTag(value);
+  }
 
-    //on testing, something this get a bug and disabled before count all quotes
-    if(this.state.clicks >= amount - 1){
-      this.setState ({clicks: 0});
-      event.target.disabled = true;
+  fetchCalled = false;
+  componentDidMount() {
+    if (!this.fetchCalled) {
+      this.fetchCalled = true;
+      this.fetchQuoteByTag('random');
     }
-
-    // console.log(this.state.clicks);
-
-    this.testingFetchQuote(value);
   }
 
   render(){
-    const {quote, tags, author, authorSlug} = this.state;
+    const {quote, tags, author, isLoading} = this.state;
 
     return(
-      <div className='principal'>
-        <div className='item1'>
-          <Mytext quote={quote} tags={tags} author={author} authorSlug={authorSlug}/>
-          <TwitterBt/>
-          <TumblerBt/>
-        </div>
+      <div>
+        <Mytext quote={quote} tags={tags} author={author} setIsLoading={this.setIsLoading}/>
+        {/* <TwitterBt/>
+        <TumblerBt/> */}
         <div className='item2'>
-          <TestingSelection triggerRef={this.triggerRef}/>
-          <button id='mybutton' onClick={this.handleClicked}>next</button>
+          <Selection triggerRef={this.triggerRef}/>
+          <button id='mybutton' onClick={this.handleClicked} >{isLoading ? ('Loading...'): ('Next Quote')}</button>
         </div>
       </div>
     )
   }
 }
+
+export default App;
