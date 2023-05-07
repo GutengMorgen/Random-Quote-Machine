@@ -1,11 +1,9 @@
-import React, {Component} from 'react';
+import React, {Component, useCallback, useState, useEffect, useRef} from 'react';
 import * as api from './Api.js';
-import {useState, useEffect, useRef} from 'react';
-import './styles.css';
-import './custom_select.css';
-import fallgif from './xd.gif';
+import rgbConverter from './rgbTohsl.js';
 import ColorThief from "colorthief";
-
+import './styles.css';
+import fallgif from './zen-meditation.gif';
 
 /*function TwitterBt()
 {
@@ -32,208 +30,96 @@ import ColorThief from "colorthief";
   );
 }*/
 
-function TestingSelection({triggerRef}){
+function Selection({triggerRef}){
   const [mytags, setTags] = useState([]);
 
   useEffect(() => {
     async function fetchData(){
-      const response = await api.tags();
-      const filter = response.filter(item => item.quoteCount > 0);
+      const getTags = await api.newTags();
+      const getdata = getTags.data;
 
-      const options = filter.map(tag => <span className="option" data-value={tag.slug} data-amount={tag.quoteCount} key={tag._id}>{tag.name}</span>)
-
+      const options = getdata.map(tag => <option key={tag} value={tag}>{tag}</option>)
+      // console.log(getdata);
       setTags(options);
     }
 
     fetchData();
   }, []);
 
-  
-  const [selectedOption, setSelectedOption] = useState(null);
-  const select_trigger = useRef(null);
-  // const triggerRef = useRef(null);
-  const optionsRef = useRef(null);
-  const selectOptionsRef = useRef(null);
-
-  function handleTriggerClick() {
-    const selectOptions = selectOptionsRef.current;
-    const options = optionsRef.current.querySelectorAll('.option');
-
-    selectOptions.classList.toggle('show');
-
-    // console.log(triggerRef.current.dataset.value);
-
-    options.forEach(option => {
-      option.addEventListener('click', () => {
-        triggerRef.current.dataset.value = option.dataset.value;
-        triggerRef.current.dataset.amount = option.dataset.amount;
-        triggerRef.current.textContent = option.textContent;
-
-        if (selectedOption) selectedOption.classList.remove('selected');
-        option.classList.add('selected');
-        setSelectedOption(option);
-
-        selectOptions.classList.remove('show');
-
-        // on testing
-        const button =  document.getElementById('mybutton');
-        button.disabled = false;
-      })
-      // console.log(option.dataset.value, option.dataset.amount);
-    });
-  }
-
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (!select_trigger.current.contains(event.target))
-        selectOptionsRef.current.classList.remove('show');
-    }
-    document.addEventListener('click', handleClickOutside);
-
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
-  }, []);
-
   return (
     <div className="selector_wrapper">
-        <div id="select_trigger" onClick={handleTriggerClick} ref={select_trigger}>
-          <span id="trigger" data-value="random" ref={triggerRef}>Random Quote</span>
-        </div>
-        <div id="select_options" ref={selectOptionsRef}>
-          <div id="container_options" ref={optionsRef}>
-            <span className="option" data-value="random">Random Quote</span>
-            {mytags}
-          </div>
-        </div>
+        <select name="AllGeneres" id="all-generes" ref={triggerRef}>
+          <option value="random">Random</option>
+          {mytags}
+        </select>
     </div>
   );
 }
 
-function MyImage(props){
-  const {authorSlug, author, setLoading} = props;
-
-  //on testing - if there not picture of the author so put the default-user.png or try to put a gif of something
+function MyImage({author, setLoading}){
   const [slug, setSlug] = useState(null);
 
   useEffect(() => {
     setLoading(true);
     async function fetchImage() {
-      const url = await api.getWikiImage(author);
-
-      if(url.query)
-      {
-        const page = Object.values(url.query.pages)[0];
-        //on testing
-        if (page.original && page.original.source)
-        {  
-          const imagesUrl = page.original.source;
-          // console.log(url);
-          setSlug(imagesUrl);
-        }
-        else{
-          setSlug(fallgif);
-          setLoading(false);
-        }
+      try {
+        const url = await api.getWikiImage(author);
+        const page = url.query && Object.values(url.query.pages)[0];
+        setSlug(page?.original?.source || fallgif);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
       }
-      
     }
 
     fetchImage();
   }, [author, setLoading]);
 
-  function handleLoad(){
+  const imgRef = useRef(null);
+  const handleLoad = useCallback(() => {
     setLoading(false);
-    // console.log('loading....');
-  }
 
-  function rgbToHsl(r, g, b) {
-    r /= 255;
-    g /= 255;
-    b /= 255;
-  
-    let cmin = Math.min(r,g,b),
-        cmax = Math.max(r,g,b),
-        delta = cmax - cmin,
-        h = 0,
-        s = 0,
-        l = 0;
-  
-    if (delta === 0) {
-      h = 0;
-    }
-    else if (cmax === r) {
-      h = ((g - b) / delta) % 6;
-    }
-    else if (cmax === g) {
-      h = (b - r) / delta + 2;
-    }
-    else {
-      h = (r - g) / delta + 4;
-    }
-  
-    h = Math.round(h * 60);
-  
-    if (h < 0) {
-      h += 360;
-    }
-  
-    l = (cmax + cmin) / 2;
-  
-    s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
-  
-    s = +(s * 100).toFixed(1);
-    l = +(l * 100).toFixed(1);
-  
-    return {h, s, l};
-    // return (`hsl(${h}%, ${s}%, ${l}%)`);
-  }
-
-  // const ColorThief = require('colorthief');
-  function handleClick(){
-    function getDominantColor() {
+    const getDominantColor = () => {
       const img = new Image();
       img.crossOrigin = "Anonymous";
       img.src = slug;
-
-      img.onload = function () {
+      img.onload = () => {
         const colorThief = new ColorThief();
         const dominantColor = colorThief.getColor(img);
-        // const rbg = `rgb(${dominantColor[0]}, ${dominantColor[1]}, ${dominantColor[2]})`
-        const hsl = rgbToHsl(dominantColor[0], dominantColor[1], dominantColor[2])
-        let light, dark;
-        if(hsl.l > 50){
-          light = `hsla(${hsl.h}, ${hsl.s}%, ${hsl.l}%, 0.75)`;
-          dark = `hsla(${hsl.h}, 50%, 50%, 0.75)`;
-        }
-        else{
-          dark = `hsla(${hsl.h}, ${hsl.s}%, ${hsl.l}%, 0.75)`;
-          light = `hsla(${hsl.h}, 50%, 50%, 0.75)`;
-        }
-        //convertir a decimal hsl
-        const defaultBackground = `linear-gradient(180deg, ${light} 0%, ${dark} 100%)`;
-        document.body.style.background = `${defaultBackground}`;
+        const hsl = rgbConverter(...dominantColor)
+
+        const hslStyle = (h, s, l, a) => `hsla(${h}, ${s}%, ${l}%, ${a})`;
+        const {h, s, l} = hsl;
+        const isLight = l > 50;
+        const lightStyle = hslStyle(h, isLight ? s : 50, isLight ? l : 50, 0.75);
+        const darkStyle = hslStyle(h, isLight ? 50 : s, isLight ? 50 : l, 0.75);
+
+        document.body.style.background = `linear-gradient(180deg, ${lightStyle} 0%, ${darkStyle} 100%)`;
+        imgRef.current.style.border = `2px solid hsl(${h}, ${s}%, ${l}%)`;
+        // console.log("Color dominante:", hsl, lightStyle, darkStyle);
         
-        console.log("Color dominante:", hsl, light, dark);
       };
-    }
-    getDominantColor()
+    };
 
-
-    
-  }
+    getDominantColor();
+  }, [slug, setLoading]);
 
   return (
-    <div id='imageContainer'>
-      <img id='imagen' src={slug || fallgif} alt={authorSlug || 'Image not found, sorry for disappointing you'} onLoad={handleLoad} onClick={handleClick}/>
+    <div id="imageContainer">
+      <img
+        id="imagen"
+        src={slug || fallgif}
+        alt={author || 'Image not found, sorry for disappointing you'}
+        onLoad={handleLoad}
+        ref={imgRef}
+      />
     </div>
   )
 }
 
-
-//textarea
 function Mytext(props) {
-  const { quote, tags, author, authorSlug, setIsLoading} = props;
+  const { quote, tags, author, setIsLoading} = props;
 
   return (
   <div className='item1'>
@@ -242,26 +128,22 @@ function Mytext(props) {
       <span className='tagsContainer' id='tags'>{tags}</span>
     </div>
     <div className='AboutAuthor'>
-          <MyImage authorSlug={authorSlug} author={author} setLoading={setIsLoading}/>
-          <span className='nameContainer' id='authorText'>{author}</span>
+      <MyImage author={author} setLoading={setIsLoading}/>
+      <span className='nameContainer' id='authorText'>{author}</span>
     </div>
   </div>
   );
 }
 
-//class default App
-export default class App extends Component{
+class App extends Component{
   constructor(props){
     super(props)
     this.state = {
       quote: '',
       tags: '',
       author: '',
-      authorSlug: '',
-      clicks: 0,
       isLoading: false
     }
-    this.handleClicked = this.handleClicked.bind(this);
     this.triggerRef = React.createRef(null);
   }
 
@@ -269,64 +151,53 @@ export default class App extends Component{
     this.setState({ isLoading });
   }
 
-  testingFetchQuote = async (currentTag) => {
-    this.setIsLoading(true);
+  fetchQuoteByTag = async (currentTag) => {
     try {
-      const getUniqueQoute = await api.getQouteByTag(currentTag);
+      const getNewshit = await api.newGetQuoteByTag(currentTag);
+      const getdata = getNewshit.data[0];
 
-      this.setState({
-        quote: getUniqueQoute.content,
-        tags: getUniqueQoute.tags,
-        author: getUniqueQoute.author,
-        authorSlug: getUniqueQoute.authorSlug,
-      })
-      // console.log(getUniqueQoute);
-
+      this.updateQuoteData(getdata);
     } catch (error) {
       console.log(error);
-      this.setIsLoading(false);
     }
-    
-    this.setIsLoading(false);
   }
 
-  handleClicked(event){
-    const value = this.triggerRef.current.dataset.value;
-    // console.log(`the actual selects value: ${value}`);
-    
-    const amount = this.triggerRef.current.dataset.amount;
-
-    this.setState (prevState => ({ clicks: prevState.clicks + 1 }))
-
-    //on testing, something this get a bug and disabled before count all quotes
-    if(this.state.clicks >= amount - 1){
-      this.setState ({clicks: 0});
-      event.target.disabled = true;
-    }
-    // console.log(this.state.clicks);
-
-    this.testingFetchQuote(value);
+  updateQuoteData = (data) => {
+    this.setState({
+      quote: data.quoteText,
+      tags: data.quoteGenre,
+      author: data.quoteAuthor
+    })
   }
 
+  handleClicked = () => {
+    const value = this.triggerRef.current.value;
+    this.fetchQuoteByTag(value);
+  }
+
+  fetchCalled = false;
   componentDidMount() {
-    // Llama a testingFetchQuote una vez que la página se haya cargado
-    this.testingFetchQuote('random');
+    if (!this.fetchCalled) {
+      this.fetchCalled = true;
+      this.fetchQuoteByTag('random');
+    }
   }
 
   render(){
-    const {quote, tags, author, authorSlug, isLoading} = this.state;
+    const {quote, tags, author, isLoading} = this.state;
 
     return(
       <div>
-        <Mytext quote={quote} tags={tags} author={author} authorSlug={authorSlug} setIsLoading={this.setIsLoading}/>
-        
+        <Mytext quote={quote} tags={tags} author={author} setIsLoading={this.setIsLoading}/>
         {/* <TwitterBt/>
         <TumblerBt/> */}
         <div className='item2'>
-          <TestingSelection triggerRef={this.triggerRef}/>
-          <button id='mybutton' onClick={this.handleClicked} disabled={isLoading ? (true) : (false)}>{isLoading ? ('loading...'): ('next')}</button>
+          <Selection triggerRef={this.triggerRef}/>
+          <button id='mybutton' onClick={this.handleClicked} >{isLoading ? ('Loading...'): ('Next Quote')}</button>
         </div>
       </div>
     )
   }
 }
+
+export default App;
