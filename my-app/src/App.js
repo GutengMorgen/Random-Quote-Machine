@@ -1,34 +1,21 @@
 import React, {Component, useCallback, useState, useEffect, useRef} from 'react';
+import {SwitchTransition, CSSTransition} from 'react-transition-group';
 import * as api from './Api.js';
+import ColorThief from 'colorthief';
 import rgbConverter from './rgbTohsl.js';
-import ColorThief from "colorthief";
-import './styles.css';
 import fallgif from './zen-meditation.gif';
+import './styles.css';
 
-/*function TwitterBt()
+function TwitterBt({text})
 {
-  //dont fucking work
-  function handleClick(event) {
-    const tweet = event.target;
-    const quote = 'negros de mierda los odio';
-    tweet.href = `https://twitter.com/intent/tweet?text=${quote}`;
-  }
+  const url = `https://twitter.com/intent/tweet?text="${text}"`;
 
   return (
-    <button onClick={handleClick}>tweet</button>
+    <button id='tweetContainer'>
+      <a href={url} target='_blank' rel="noreferrer" id='tweet-quote'>tweet</a>
+    </button>
   );
-}*/
-
-/*function TumblerBt()
-{
-  function handleClick() {
-    
-  }
-
-  return (
-    <button onClick={handleClick}>facebook</button>
-  );
-}*/
+}
 
 function Selection({triggerRef}){
   const [mytags, setTags] = useState([]);
@@ -39,7 +26,6 @@ function Selection({triggerRef}){
       const getdata = getTags.data;
 
       const options = getdata.map(tag => <option key={tag} value={tag}>{tag}</option>)
-      // console.log(getdata);
       setTags(options);
     }
 
@@ -48,7 +34,7 @@ function Selection({triggerRef}){
 
   return (
     <div className="selector_wrapper">
-        <select name="AllGeneres" id="all-generes" ref={triggerRef}>
+        <select id="all-generes" ref={triggerRef}>
           <option value="random">Random</option>
           {mytags}
         </select>
@@ -56,11 +42,10 @@ function Selection({triggerRef}){
   );
 }
 
-function MyImage({author, setLoading}){
+function MyImage ({author, setBackgroundStyle}){
   const [slug, setSlug] = useState(null);
-
+  const imgRef = useRef(null);
   useEffect(() => {
-    setLoading(true);
     async function fetchImage() {
       try {
         const url = await api.getWikiImage(author);
@@ -68,69 +53,64 @@ function MyImage({author, setLoading}){
         setSlug(page?.original?.source || fallgif);
       } catch (error) {
         console.error(error);
-      } finally {
-        setLoading(false);
       }
     }
 
     fetchImage();
-  }, [author, setLoading]);
+  }, [author]);
 
-  const imgRef = useRef(null);
   const handleLoad = useCallback(() => {
-    setLoading(false);
 
     const getDominantColor = () => {
-      const img = new Image();
+      const img = imgRef.current;
       img.crossOrigin = "Anonymous";
       img.src = slug;
       img.onload = () => {
         const colorThief = new ColorThief();
         const dominantColor = colorThief.getColor(img);
         const hsl = rgbConverter(...dominantColor)
-
-        const hslStyle = (h, s, l, a) => `hsla(${h}, ${s}%, ${l}%, ${a})`;
         const {h, s, l} = hsl;
-        const isLight = l > 50;
-        const lightStyle = hslStyle(h, isLight ? s : 50, isLight ? l : 50, 0.75);
-        const darkStyle = hslStyle(h, isLight ? 50 : s, isLight ? 50 : l, 0.75);
+        const isLight = l > 40;
 
-        document.body.style.background = `linear-gradient(180deg, ${lightStyle} 0%, ${darkStyle} 100%)`;
-        imgRef.current.style.border = `2px solid hsl(${h}, ${s}%, ${l}%)`;
-        // console.log("Color dominante:", hsl, lightStyle, darkStyle);
-        
+        setBackgroundStyle ({
+          backgroundColor : `hsl(${h}, ${isLight ? s : 40}%, ${isLight ? l : 50}%)`
+        })
       };
     };
-
+    
     getDominantColor();
-  }, [slug, setLoading]);
+  }, [slug, setBackgroundStyle]);
 
   return (
     <div id="imageContainer">
-      <img
-        id="imagen"
-        src={slug || fallgif}
-        alt={author || 'Image not found, sorry for disappointing you'}
-        onLoad={handleLoad}
-        ref={imgRef}
-      />
+      <SwitchTransition >
+        <CSSTransition classNames="fade" key={slug} addEndListener={(node, done) => node.addEventListener('transitionend', done, false)}>
+          <img
+          ref={imgRef}
+          id="imagen"
+          src={slug || fallgif}
+          alt={author || 'Image not found, sorry for disappointing you'}
+          onLoad={handleLoad}
+        />
+        </CSSTransition>
+      </SwitchTransition>
     </div>
   )
 }
 
-function Mytext(props) {
-  const { quote, tags, author, setIsLoading} = props;
+function Mytext({ quote, tags }) {
 
   return (
-  <div className='item1'>
-    <div className='AboutQuote'>
-      <span id='quoteContainer'>"{quote}"</span>
-      <span className='tagsContainer' id='tags'>{tags}</span>
-    </div>
-    <div className='AboutAuthor'>
-      <MyImage author={author} setLoading={setIsLoading}/>
-      <span className='nameContainer' id='authorText'>{author}</span>
-    </div>
+  <div className='AboutQuote'>
+    <SwitchTransition>
+      <CSSTransition classNames="fade" key={quote} addEndListener={(node, done) => node.addEventListener('transitionend', done, false)}>
+        <span id='text' style={quote.length >= 200 ? {alignItems: "baseline"} : {alignItems: "center"}}>
+          "{quote}"
+        </span>
+      </CSSTransition>
+    </SwitchTransition>
+    <span className='tagsContainer' id='tags'>{tags}</span>
+    <TwitterBt text={quote}/>
   </div>
   );
 }
@@ -142,13 +122,10 @@ class App extends Component{
       quote: '',
       tags: '',
       author: '',
-      isLoading: false
+      isLoading: false,
+      backgroundStyle: {}
     }
     this.triggerRef = React.createRef(null);
-  }
-
-  setIsLoading = (isLoading) => {
-    this.setState({ isLoading });
   }
 
   fetchQuoteByTag = async (currentTag) => {
@@ -171,8 +148,14 @@ class App extends Component{
   }
 
   handleClicked = () => {
+    this.setState({ isLoading: true });
+
     const value = this.triggerRef.current.value;
     this.fetchQuoteByTag(value);
+
+    setTimeout(() => {
+      this.setState({ isLoading: false });
+    }, 5000);
   }
 
   fetchCalled = false;
@@ -183,18 +166,26 @@ class App extends Component{
     }
   }
 
+  setBackgroundStyle = (style) => {
+    this.setState({backgroundStyle : style});
+  }
+
   render(){
-    const {quote, tags, author, isLoading} = this.state;
+    const {quote, tags, author, isLoading, backgroundStyle} = this.state;
 
     return(
-      <div>
-        <Mytext quote={quote} tags={tags} author={author} setIsLoading={this.setIsLoading}/>
-        {/* <TwitterBt/>
-        <TumblerBt/> */}
-        <div className='item2'>
-          <Selection triggerRef={this.triggerRef}/>
-          <button id='mybutton' onClick={this.handleClicked} >{isLoading ? ('Loading...'): ('Next Quote')}</button>
-        </div>
+      <div id='quote-box' style={backgroundStyle}>
+          <div className='item1'>
+            <Mytext quote={quote} tags={tags}/>
+            <div className='AboutAuthor'>
+              <MyImage author={author} setBackgroundStyle={this.setBackgroundStyle}/>
+              <span className='nameContainer' id='author'>{author}</span>
+            </div>
+          </div>
+          <div className='item2'>
+            <Selection triggerRef={this.triggerRef}/>
+            <button id='new-quote' onClick={this.handleClicked} disabled={isLoading}>{isLoading ? ('Loading...'): <span>Next Quote</span> }</button>
+          </div>
       </div>
     )
   }
