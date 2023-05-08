@@ -22,10 +22,10 @@ to select:
 
 for optimization or avoid bugs
     * -hacer que cuando se haga click se deshabilite la funcion del click temporalmente hasta que aparezca el texto
-    -crear una funcion para que aparezca un texto al lado del boton quote que contenga: "esperando..."
+    x -crear una funcion para que aparezca un texto al lado del boton quote que contenga: "esperando..."
 
 fix bugs
     * -creo que la api se esta llamando dos veces (separar el setstate de la funcion que llama a la api)
     * -cambiar de api para obtener las citas
-    -tener 2 apis disponibles si uno de ellos falla, 1: quotegarden 2: Type.fit API
+    x -tener 2 apis disponibles si uno de ellos falla, 1: quotegarden 2: Type.fit API
     * -optimizar la funcion MyImage

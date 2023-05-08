@@ -4,6 +4,9 @@ import rgbConverter from './rgbTohsl.js';
 import ColorThief from "colorthief";
 import './styles.css';
 import fallgif from './zen-meditation.gif';
+import {SwitchTransition, CSSTransition} from 'react-transition-group';
+import 'bootstrap-select';
+import $ from 'jquery';
 
 /*function TwitterBt()
 {
@@ -30,6 +33,8 @@ import fallgif from './zen-meditation.gif';
   );
 }*/
 
+$.fn.selectpicker.Constructor.BootstrapVersion = '4';
+
 function Selection({triggerRef}){
   const [mytags, setTags] = useState([]);
 
@@ -39,7 +44,6 @@ function Selection({triggerRef}){
       const getdata = getTags.data;
 
       const options = getdata.map(tag => <option key={tag} value={tag}>{tag}</option>)
-      // console.log(getdata);
       setTags(options);
     }
 
@@ -48,7 +52,7 @@ function Selection({triggerRef}){
 
   return (
     <div className="selector_wrapper">
-        <select name="AllGeneres" id="all-generes" ref={triggerRef}>
+        <select id="all-generes" ref={triggerRef}>
           <option value="random">Random</option>
           {mytags}
         </select>
@@ -56,9 +60,9 @@ function Selection({triggerRef}){
   );
 }
 
-function MyImage({author, setLoading}){
+function MyImage ({author, setLoading, setBackgroundStyle}){
   const [slug, setSlug] = useState(null);
-
+  const imgRef = useRef(null);
   useEffect(() => {
     setLoading(true);
     async function fetchImage() {
@@ -68,69 +72,65 @@ function MyImage({author, setLoading}){
         setSlug(page?.original?.source || fallgif);
       } catch (error) {
         console.error(error);
-      } finally {
-        setLoading(false);
       }
     }
 
     fetchImage();
   }, [author, setLoading]);
 
-  const imgRef = useRef(null);
   const handleLoad = useCallback(() => {
-    setLoading(false);
 
     const getDominantColor = () => {
-      const img = new Image();
+      const img = imgRef.current;
       img.crossOrigin = "Anonymous";
       img.src = slug;
       img.onload = () => {
         const colorThief = new ColorThief();
         const dominantColor = colorThief.getColor(img);
         const hsl = rgbConverter(...dominantColor)
-
-        const hslStyle = (h, s, l, a) => `hsla(${h}, ${s}%, ${l}%, ${a})`;
         const {h, s, l} = hsl;
-        const isLight = l > 50;
-        const lightStyle = hslStyle(h, isLight ? s : 50, isLight ? l : 50, 0.75);
-        const darkStyle = hslStyle(h, isLight ? 50 : s, isLight ? 50 : l, 0.75);
+        const isLight = l > 40;
 
-        document.body.style.background = `linear-gradient(180deg, ${lightStyle} 0%, ${darkStyle} 100%)`;
-        imgRef.current.style.border = `2px solid hsl(${h}, ${s}%, ${l}%)`;
-        // console.log("Color dominante:", hsl, lightStyle, darkStyle);
-        
+        setBackgroundStyle ({
+          backgroundColor : `hsl(${h}, ${isLight ? s : 40}%, ${isLight ? l : 50}%)`
+        })
       };
+      
+      setLoading(false);
     };
-
+    
     getDominantColor();
-  }, [slug, setLoading]);
+  }, [slug, setLoading, setBackgroundStyle]);
 
   return (
     <div id="imageContainer">
-      <img
-        id="imagen"
-        src={slug || fallgif}
-        alt={author || 'Image not found, sorry for disappointing you'}
-        onLoad={handleLoad}
-        ref={imgRef}
-      />
+      <SwitchTransition >
+        <CSSTransition classNames="fade" key={slug} addEndListener={(node, done) => node.addEventListener('transitionend', done, false)}>
+          <img
+          ref={imgRef}
+          id="imagen"
+          src={slug || fallgif}
+          alt={author || 'Image not found, sorry for disappointing you'}
+          onLoad={handleLoad}
+        />
+        </CSSTransition>
+      </SwitchTransition>
     </div>
   )
 }
 
-function Mytext(props) {
-  const { quote, tags, author, setIsLoading} = props;
+function Mytext({ quote, tags }) {
 
   return (
-  <div className='item1'>
-    <div className='AboutQuote'>
-      <span id='quoteContainer'>"{quote}"</span>
-      <span className='tagsContainer' id='tags'>{tags}</span>
-    </div>
-    <div className='AboutAuthor'>
-      <MyImage author={author} setLoading={setIsLoading}/>
-      <span className='nameContainer' id='authorText'>{author}</span>
-    </div>
+  <div className='AboutQuote'>
+    <SwitchTransition>
+      <CSSTransition classNames="fade" key={quote} addEndListener={(node, done) => node.addEventListener('transitionend', done, false)}>
+        <span id='quoteContainer' style={quote.length >= 200 ? {alignItems: "baseline"} : {alignItems: "center"}}>
+          "{quote}"
+        </span>
+      </CSSTransition>
+    </SwitchTransition>
+    <span className='tagsContainer' id='tags'>{tags}</span>
   </div>
   );
 }
@@ -142,7 +142,8 @@ class App extends Component{
       quote: '',
       tags: '',
       author: '',
-      isLoading: false
+      isLoading: false,
+      backgroundStyle: {}
     }
     this.triggerRef = React.createRef(null);
   }
@@ -183,18 +184,28 @@ class App extends Component{
     }
   }
 
+  setBackgroundStyle = (style) => {
+    this.setState({backgroundStyle : style})
+  }
+
   render(){
-    const {quote, tags, author, isLoading} = this.state;
+    const {quote, tags, author, isLoading, backgroundStyle} = this.state;
 
     return(
-      <div>
-        <Mytext quote={quote} tags={tags} author={author} setIsLoading={this.setIsLoading}/>
-        {/* <TwitterBt/>
-        <TumblerBt/> */}
-        <div className='item2'>
-          <Selection triggerRef={this.triggerRef}/>
-          <button id='mybutton' onClick={this.handleClicked} >{isLoading ? ('Loading...'): ('Next Quote')}</button>
-        </div>
+      <div className='Container' style={backgroundStyle}>
+          <div className='item1'>
+            <Mytext quote={quote} tags={tags}/>
+            <div className='AboutAuthor'>
+              <MyImage author={author} setLoading={this.setIsLoading} setBackgroundStyle={this.setBackgroundStyle}/>
+              <span className='nameContainer' id='authorText'>{author}</span>
+            </div>
+          </div>
+          {/* <TwitterBt/>
+          <TumblerBt/> */}
+          <div className='item2'>
+            <Selection triggerRef={this.triggerRef}/>
+            <button id='mybutton' onClick={this.handleClicked} disabled={isLoading}>{isLoading ? ('Loading...'): <span>Next Quote</span> }</button>
+          </div>
       </div>
     )
   }

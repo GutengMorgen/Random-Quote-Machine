@@ -20,53 +20,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital@1&display=swap');
 
 #quoteContainer{
-    /* background-color: rgba(244, 244, 244, 0.9); */
     width: 20em;
     height: 6em;
-    /* display: block; */
 
     /* more styles */
     padding: 15px;
     font-size: xx-large;
-    /* border: 1px solid rgba(43, 43, 43, 0.568);
-    border-radius: 12px; */
-    resize: none;
-    position: relative;
 
-    /* testing shit */
     display: flex;
     justify-content: center;
-    align-items: center;
+    /* align-items: center; */
     font-family: 'Cormorant Garamond', serif;
-    /* From https://css.glass
-    background: rgba(92, 5, 115, 0.18);
-    border-radius: 12px;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(6.2px);
-    -webkit-backdrop-filter: blur(6.2px);
-    border: 1px solid rgba(92, 5, 115, 0.22);
-    */
-    /* 
-    width: 27em;
-    height: 10em;
-    display: block;
-    padding: 15px;
-    font-size: larger;
-    resize: none;
-    position: relative;
-    background: rgb(255 255 255 / 23%);
-    border-radius: 12px;
-    box-shadow: 4px 9px 30px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(21.2px);
-    -webkit-backdrop-filter: blur(6.2px);
-    border: 1px solid rgb(92 92 92 / 22%);
-    */
+    overflow: auto;
+    cursor: default;
+}
+
+#quoteContainer::-webkit-scrollbar{
+    width: 3px;
 }
 
 #imageContainer{
-    /* background-color: darkmagenta; */
     height: 14em;
-    padding-top: 2px;
     position: relative;
 }
 
@@ -74,6 +48,7 @@
     height: 13.5em;
     width: 13.5em;
     border-radius: 50%;
+    background-color: ghostwhite;
 }
 
 #tags{
@@ -86,7 +61,7 @@
     padding: 3px 7px;
     font-size: x-small;
 
-    background: linear-gradient(180deg, rgba(244, 244, 244, 0.85) 0%, rgba(244, 244, 244, 0.25) 100%);
+    background: linear-gradient(180deg, rgba(244, 244, 244, 0.25) 0%, rgba(244, 244, 244, 0.25) 100%);
     backdrop-filter: blur(7px);
     border-radius: 2px;
 }
@@ -98,8 +73,6 @@
 
     /* more styles */
     padding: 4px 10px;
-    /* background-color: #F4F4F4;
-    border-radius: 3px; */
     margin-top: 10px;
 
     background: linear-gradient(180deg, rgba(232, 240, 246, 0.88) 0%, rgba(232, 240, 246, 0.88) 100%);
@@ -113,6 +86,7 @@
 
 .item2{
     /* background-color: #F4F4F4; */
+    width: 57em;
     padding: 20px;
     /* border: 1px solid #E8E8E8; */
     border-radius: 7px;
@@ -126,19 +100,21 @@
 }
 
 #mybutton{
-    /* background-color: #3F2602;
-    border: 1px solid #200202; */
     color: white;
     border-radius: 5px;
     padding: 13px 30px;
 
+    width: 200px;
+    height: 70px;
+    box-sizing: border-box;
+
     font-family: fantasy;
     font-size: 30px;
     background: #40314A;
-    border: 1px solid #3C3143;
+    border: none;
     box-shadow: 0px 4px 6px 1px rgba(0, 0, 0, 0.25);
     cursor: pointer;
-    transition: all ease 1s;
+    transition: all 0.18s ease-in-out;
     position: relative;
 }
 
@@ -148,7 +124,7 @@
 
 #mybutton::after{
     content: '';
-    background-color: rgba(231, 239, 255, 0.6);
+    background-color: rgba(231, 239, 255, 0.25);
     border-radius: 11px;
     position: absolute;
     bottom: 50%;
@@ -156,12 +132,16 @@
     opacity: 0;
     padding: 18% 52%;
     margin: -18% -52%;
-    transition: all 0.4s;
+    transition: all 0.4s ease-in-out;
 }
 
 #mybutton:active
 {
-    transform: translateY(6px);
+    transform: translateY(3px);
+}
+
+#mybutton:disabled{
+    background: #747077;
 }
 
 #mybutton:active::after{
@@ -171,14 +151,15 @@
     transition: 0s;
 }
 
-body{
+.Container{
     display: flex;
     min-height: 100vh;
     justify-content: center;
     align-items: center;
     text-align: center;
-    /* background: aliceblue; */
-    transition: all ease-in-out 3s;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    transition: background-color 1.5s ease-in-out;
 }
 
 ::-webkit-scrollbar {
@@ -215,11 +196,37 @@ body{
     margin-top: 10px;
 }
 
-.fade-in {
+.selector_wrapper select{
+    padding: 10px;
+    box-sizing: border-box;
+    width: 160px;
+    outline: none;
+    border: none;
+    font-size: medium;
+    font-weight: lighter;
+    font-family: inherit;
+    border-radius: 5px;
+}
+
+.selector_wrapper option:checked{
+    background-color: skyblue;
+    color: #fff;
+}
+
+
+.fade-enter{
     opacity: 0;
-    transition: opacity 0.5s ease-in;
-  }
-  
-  .fade-in.active {
+ }
+ .fade-exit{
     opacity: 1;
-  }
+ }
+ .fade-enter-active{
+    opacity: 1;
+ }
+ .fade-exit-active{
+    opacity: 0;
+ }
+ .fade-enter-active,
+ .fade-exit-active{
+    transition: opacity 1s;
+ }
