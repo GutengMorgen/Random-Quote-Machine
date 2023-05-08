@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/Random-Quote-Machine/static/css/main.28ed490e.css",
+    "main.js": "/Random-Quote-Machine/static/js/main.62019c52.js",
+    "static/js/787.28cb0dcd.chunk.js": "/Random-Quote-Machine/static/js/787.28cb0dcd.chunk.js",
+    "static/media/zen-meditation.gif": "/Random-Quote-Machine/static/media/zen-meditation.3329aaf3096a174a22cc.gif",
+    "index.html": "/Random-Quote-Machine/index.html",
+    "main.28ed490e.css.map": "/Random-Quote-Machine/static/css/main.28ed490e.css.map",
+    "main.62019c52.js.map": "/Random-Quote-Machine/static/js/main.62019c52.js.map",
+    "787.28cb0dcd.chunk.js.map": "/Random-Quote-Machine/static/js/787.28cb0dcd.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.28ed490e.css",
+    "static/js/main.62019c52.js"
+  ]
+}
