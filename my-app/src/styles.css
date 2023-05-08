@@ -19,7 +19,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital@1&display=swap');
 
-#quoteContainer{
+#text{
     width: 20em;
     height: 6em;
 
@@ -35,7 +35,7 @@
     cursor: default;
 }
 
-#quoteContainer::-webkit-scrollbar{
+#text::-webkit-scrollbar{
     width: 3px;
 }
 
@@ -66,7 +66,25 @@
     border-radius: 2px;
 }
 
-#authorText{
+#tweetContainer{
+    display: block;
+    margin: 7px;
+    padding: 4px 8px;
+    font-size: x-small;
+    
+    background: linear-gradient(180deg, rgba(244, 244, 244, 0.25) 0%, rgba(244, 244, 244, 0.25) 100%);
+    -webkit-backdrop-filter: blur(7px);
+    backdrop-filter: blur(7px);
+    border-radius: 2px;
+    border: none;
+}
+
+#tweet-quote {
+    color: black;
+    text-decoration: none;
+}
+
+#author{
     width: fit-content;
     height: auto;
     display: inline-block;
@@ -81,7 +99,7 @@
     border-radius: 3px;
 }
 
-.AboutQuote{grid-area: aq;}
+#AboutQuote{grid-area: aq;}
 .AboutAuthor{grid-area: aa;}
 
 .item2{
@@ -99,7 +117,7 @@
     border-radius: 7px;
 }
 
-#mybutton{
+#new-quote{
     color: white;
     border-radius: 5px;
     padding: 13px 30px;
@@ -118,13 +136,13 @@
     position: relative;
 }
 
-#mybutton:hover{
+#new-quote:hover{
     box-shadow: 0px 6px 10px 0px rgba(0, 0, 0, 0.3);
 }
 
-#mybutton::after{
+#new-quote::after{
     content: '';
-    background-color: rgba(231, 239, 255, 0.25);
+    background-color: rgba(102, 111, 131, 0.25);
     border-radius: 11px;
     position: absolute;
     bottom: 50%;
@@ -135,23 +153,24 @@
     transition: all 0.4s ease-in-out;
 }
 
-#mybutton:active
+#new-quote:active
 {
     transform: translateY(3px);
 }
 
-#mybutton:disabled{
-    background: #747077;
+#new-quote:disabled{
+    background: hsl(274, 4%, 50%);
+    transition: all 0.5s ease-in-out;
 }
 
-#mybutton:active::after{
+#new-quote:active::after{
     padding: 0;
     margin: 0;
     opacity: 1;
     transition: 0s;
 }
 
-.Container{
+#quote-box{
     display: flex;
     min-height: 100vh;
     justify-content: center;
@@ -206,6 +225,10 @@
     font-weight: lighter;
     font-family: inherit;
     border-radius: 5px;
+    
+    background: linear-gradient(180deg, rgba(244, 244, 244, 0.25) 0%, rgba(244, 244, 244, 0.25) 100%);
+    -webkit-backdrop-filter: blur(7px);
+    backdrop-filter: blur(7px);
 }
 
 .selector_wrapper option:checked{
@@ -213,20 +236,19 @@
     color: #fff;
 }
 
-
 .fade-enter{
     opacity: 0;
- }
- .fade-exit{
+}
+.fade-exit{
     opacity: 1;
- }
- .fade-enter-active{
+}
+.fade-enter-active{
     opacity: 1;
- }
- .fade-exit-active{
+}
+.fade-exit-active{
     opacity: 0;
- }
- .fade-enter-active,
- .fade-exit-active{
+}
+.fade-enter-active,
+.fade-exit-active{
     transition: opacity 1s;
- }
+}

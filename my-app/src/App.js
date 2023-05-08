@@ -1,39 +1,21 @@
 import React, {Component, useCallback, useState, useEffect, useRef} from 'react';
-import * as api from './Api.js';
-import rgbConverter from './rgbTohsl.js';
-import ColorThief from "colorthief";
-import './styles.css';
-import fallgif from './zen-meditation.gif';
 import {SwitchTransition, CSSTransition} from 'react-transition-group';
-import 'bootstrap-select';
-import $ from 'jquery';
+import * as api from './Api.js';
+import ColorThief from 'colorthief';
+import rgbConverter from './rgbTohsl.js';
+import fallgif from './zen-meditation.gif';
+import './styles.css';
 
-/*function TwitterBt()
+function TwitterBt({text})
 {
-  //dont fucking work
-  function handleClick(event) {
-    const tweet = event.target;
-    const quote = 'negros de mierda los odio';
-    tweet.href = `https://twitter.com/intent/tweet?text=${quote}`;
-  }
+  const url = `https://twitter.com/intent/tweet?text="${text}"`;
 
   return (
-    <button onClick={handleClick}>tweet</button>
+    <button id='tweetContainer'>
+      <a href={url} target='_blank' rel="noreferrer" id='tweet-quote'>tweet</a>
+    </button>
   );
-}*/
-
-/*function TumblerBt()
-{
-  function handleClick() {
-    
-  }
-
-  return (
-    <button onClick={handleClick}>facebook</button>
-  );
-}*/
-
-$.fn.selectpicker.Constructor.BootstrapVersion = '4';
+}
 
 function Selection({triggerRef}){
   const [mytags, setTags] = useState([]);
@@ -60,11 +42,10 @@ function Selection({triggerRef}){
   );
 }
 
-function MyImage ({author, setLoading, setBackgroundStyle}){
+function MyImage ({author, setBackgroundStyle}){
   const [slug, setSlug] = useState(null);
   const imgRef = useRef(null);
   useEffect(() => {
-    setLoading(true);
     async function fetchImage() {
       try {
         const url = await api.getWikiImage(author);
@@ -76,7 +57,7 @@ function MyImage ({author, setLoading, setBackgroundStyle}){
     }
 
     fetchImage();
-  }, [author, setLoading]);
+  }, [author]);
 
   const handleLoad = useCallback(() => {
 
@@ -95,12 +76,10 @@ function MyImage ({author, setLoading, setBackgroundStyle}){
           backgroundColor : `hsl(${h}, ${isLight ? s : 40}%, ${isLight ? l : 50}%)`
         })
       };
-      
-      setLoading(false);
     };
     
     getDominantColor();
-  }, [slug, setLoading, setBackgroundStyle]);
+  }, [slug, setBackgroundStyle]);
 
   return (
     <div id="imageContainer">
@@ -125,12 +104,13 @@ function Mytext({ quote, tags }) {
   <div className='AboutQuote'>
     <SwitchTransition>
       <CSSTransition classNames="fade" key={quote} addEndListener={(node, done) => node.addEventListener('transitionend', done, false)}>
-        <span id='quoteContainer' style={quote.length >= 200 ? {alignItems: "baseline"} : {alignItems: "center"}}>
+        <span id='text' style={quote.length >= 200 ? {alignItems: "baseline"} : {alignItems: "center"}}>
           "{quote}"
         </span>
       </CSSTransition>
     </SwitchTransition>
     <span className='tagsContainer' id='tags'>{tags}</span>
+    <TwitterBt text={quote}/>
   </div>
   );
 }
@@ -146,10 +126,6 @@ class App extends Component{
       backgroundStyle: {}
     }
     this.triggerRef = React.createRef(null);
-  }
-
-  setIsLoading = (isLoading) => {
-    this.setState({ isLoading });
   }
 
   fetchQuoteByTag = async (currentTag) => {
@@ -172,8 +148,14 @@ class App extends Component{
   }
 
   handleClicked = () => {
+    this.setState({ isLoading: true });
+
     const value = this.triggerRef.current.value;
     this.fetchQuoteByTag(value);
+
+    setTimeout(() => {
+      this.setState({ isLoading: false });
+    }, 5000);
   }
 
   fetchCalled = false;
@@ -185,26 +167,24 @@ class App extends Component{
   }
 
   setBackgroundStyle = (style) => {
-    this.setState({backgroundStyle : style})
+    this.setState({backgroundStyle : style});
   }
 
   render(){
     const {quote, tags, author, isLoading, backgroundStyle} = this.state;
 
     return(
-      <div className='Container' style={backgroundStyle}>
+      <div id='quote-box' style={backgroundStyle}>
           <div className='item1'>
             <Mytext quote={quote} tags={tags}/>
             <div className='AboutAuthor'>
-              <MyImage author={author} setLoading={this.setIsLoading} setBackgroundStyle={this.setBackgroundStyle}/>
-              <span className='nameContainer' id='authorText'>{author}</span>
+              <MyImage author={author} setBackgroundStyle={this.setBackgroundStyle}/>
+              <span className='nameContainer' id='author'>{author}</span>
             </div>
           </div>
-          {/* <TwitterBt/>
-          <TumblerBt/> */}
           <div className='item2'>
             <Selection triggerRef={this.triggerRef}/>
-            <button id='mybutton' onClick={this.handleClicked} disabled={isLoading}>{isLoading ? ('Loading...'): <span>Next Quote</span> }</button>
+            <button id='new-quote' onClick={this.handleClicked} disabled={isLoading}>{isLoading ? ('Loading...'): <span>Next Quote</span> }</button>
           </div>
       </div>
     )
