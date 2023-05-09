@@ -6,9 +6,9 @@ import rgbConverter from './rgbTohsl.js';
 import fallgif from './zen-meditation.gif';
 import './styles.css';
 
-function TwitterBt({text})
+function TwitterBt({text, author})
 {
-  const url = `https://twitter.com/intent/tweet?text="${text}"`;
+  const url = `https://twitter.com/intent/tweet?text="${text}" -${author}`;
 
   return (
     <button id='tweetContainer'>
@@ -46,6 +46,8 @@ function MyImage ({author, setBackgroundStyle}){
   const [slug, setSlug] = useState(null);
   const imgRef = useRef(null);
   useEffect(() => {
+    if (author === '') return;
+
     async function fetchImage() {
       try {
         const url = await api.getWikiImage(author);
@@ -88,8 +90,8 @@ function MyImage ({author, setBackgroundStyle}){
           <img
           ref={imgRef}
           id="imagen"
-          src={slug || fallgif}
-          alt={author || 'Image not found, sorry for disappointing you'}
+          src={slug}
+          alt={author}
           onLoad={handleLoad}
         />
         </CSSTransition>
@@ -98,24 +100,24 @@ function MyImage ({author, setBackgroundStyle}){
   )
 }
 
-function Mytext({ quote, tags }) {
+function Mytext({ quote, tags, author }) {
 
   return (
   <div className='AboutQuote'>
     <SwitchTransition>
       <CSSTransition classNames="fade" key={quote} addEndListener={(node, done) => node.addEventListener('transitionend', done, false)}>
-        <span id='text' style={quote.length >= 200 ? {alignItems: "baseline"} : {alignItems: "center"}}>
-          "{quote}"
+        <span id='text' style={quote.length >= 240 ? {alignItems: "baseline"} : {alignItems: "center"}}>
+          {quote.length > 0 ? `"${quote}"` : null}
         </span>
       </CSSTransition>
     </SwitchTransition>
     <span className='tagsContainer' id='tags'>{tags}</span>
-    <TwitterBt text={quote}/>
+    <TwitterBt text={quote} author={author}/>
   </div>
   );
 }
 
-class App extends Component{
+export default class App extends Component{
   constructor(props){
     super(props)
     this.state = {
@@ -123,10 +125,13 @@ class App extends Component{
       tags: '',
       author: '',
       isLoading: false,
-      backgroundStyle: {},
-      isLoaded: false // nuevo estado
+      backgroundStyle: {}
     }
     this.triggerRef = React.createRef(null);
+  }
+
+  componentDidMount(){
+    this.fetchQuoteByTag('random');
   }
 
   fetchQuoteByTag = async (currentTag) => {
@@ -159,13 +164,6 @@ class App extends Component{
     }, 5000);
   }
 
-  componentDidMount() {
-    if (!this.state.isLoaded) { // llama a fetchQuoteByTag() solo si isLoaded es false
-      this.fetchQuoteByTag('random');
-      this.setState({ isLoaded: true }); // establece isLoaded en true después de que se llama a fetchQuoteByTag()
-    }
-  }
-
   setBackgroundStyle = (style) => {
     this.setState({backgroundStyle : style});
   }
@@ -176,7 +174,7 @@ class App extends Component{
     return(
       <div id='quote-box' style={backgroundStyle}>
           <div className='item1'>
-            <Mytext quote={quote} tags={tags}/>
+            <Mytext quote={quote} tags={tags} author={author}/>
             <div className='AboutAuthor'>
               <MyImage author={author} setBackgroundStyle={this.setBackgroundStyle}/>
               <span className='nameContainer' id='author'>{author}</span>
@@ -190,5 +188,3 @@ class App extends Component{
     )
   }
 }
-
-export default App;

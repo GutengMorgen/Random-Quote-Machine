@@ -8,17 +8,7 @@ export const newGetQuoteByTag = async (tagName) => {
 
     try {
         const response = await fetch(`${BASE_URL_QG}/quotes/${str}`);
-        const data = response.json();
-        return data;
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-export const newRandomQuote = async () => {
-    try {
-        const response = await fetch(`${BASE_URL_QG}/quotes/random`);
-        const data = response.json();
+        const data = await response.json();
         return data;
     } catch (error) {
         console.log(error);
@@ -28,7 +18,7 @@ export const newRandomQuote = async () => {
 export const newTags = async () => {
     try {
         const response = await fetch(`${BASE_URL_QG}/genres`);
-        const data = response.json();
+        const data = await response.json();
         return data;
     } catch (error) {
         console.log(error);
@@ -38,8 +28,7 @@ export const newTags = async () => {
 export const getWikiImage = async (authorName) => {
     try {
         const response = await fetch(`${WIKI_IMAGE_BASE}${authorName}&origin=*`);
-        const data = response.json();
-        // console.log("thi is response",response, "this is data",data);
+        const data = await response.json();
         return data;
     } catch (error) {
         console.log(error);

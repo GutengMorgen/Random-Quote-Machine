@@ -192,12 +192,12 @@
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-    background: #888; 
+    background: #424242; 
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-    background: #555; 
+    background: #222222; 
 }
 
 .selector_wrapper
