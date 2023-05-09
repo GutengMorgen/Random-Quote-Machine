@@ -4,7 +4,7 @@ This is a project from FreeCodeCamp's FrontEnd Project, the Random Quote Machine
 
 ## Demo
 
-You can see a live demo of the Random Quote Machine [aqui](https://gutengmorgen.github.io/Random-Quote-Machine/){:target="_blank"}.
+You can see a live demo of the Random Quote Machine [aqui](https://gutengmorgen.github.io/Random-Quote-Machine/).
 
 ## Usage
 
