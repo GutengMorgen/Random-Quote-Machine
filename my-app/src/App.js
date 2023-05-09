@@ -123,7 +123,8 @@ class App extends Component{
       tags: '',
       author: '',
       isLoading: false,
-      backgroundStyle: {}
+      backgroundStyle: {},
+      isLoaded: false // nuevo estado
     }
     this.triggerRef = React.createRef(null);
   }
@@ -158,11 +159,10 @@ class App extends Component{
     }, 5000);
   }
 
-  fetchCalled = false;
   componentDidMount() {
-    if (!this.fetchCalled) {
-      this.fetchCalled = true;
+    if (!this.state.isLoaded) { // llama a fetchQuoteByTag() solo si isLoaded es false
       this.fetchQuoteByTag('random');
+      this.setState({ isLoaded: true }); // establece isLoaded en true después de que se llama a fetchQuoteByTag()
     }
   }
 
